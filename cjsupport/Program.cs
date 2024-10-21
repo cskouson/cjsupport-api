@@ -7,6 +7,7 @@ using cjsupport.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 var congfiguration = builder.Configuration;
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 //add dbcontext
 builder.Services.AddDbContext<CjsupportDbContext>
@@ -24,6 +25,18 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//config CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:3000")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                      });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -32,6 +45,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseHttpsRedirection();
 

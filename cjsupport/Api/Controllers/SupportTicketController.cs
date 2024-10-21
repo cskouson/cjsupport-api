@@ -37,7 +37,7 @@ namespace cjsupport.Api.Controllers
 
         [Route("add-support-ticket")]
         [HttpPost]
-        public async Task<IActionResult> AddSupportTicket([FromForm] SupportTicketControllerPostDto dto)
+        public async Task<IActionResult> AddSupportTicket([FromBody] SupportTicketControllerPostDto dto)
         {
             var Ticket = await _supportTicketService.AddSupportTicket(_mapper.Map<SupportTicketDto>(dto));
             return Ok(Ticket);

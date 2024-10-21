@@ -2,7 +2,7 @@
 using cjsupport.Common.Dtos;
 using cjsupport.Data.Entities;
 using cjsupport.Data.Repositories.Interfaces;
-//using cjsupport.Domain.BusinessRules.SupportTicketRules;
+using cjsupport.Domain.BusinessRules.SupportTicketRules;
 using cjsupport.Domain.Services.Interfaces;
 
 
@@ -80,26 +80,38 @@ namespace cjsupport.Domain.Services
 
             try
             {
-                SupportTicketEntity Ticket = new SupportTicketEntity()
+                if (SupportTicketRulesBase.RunAllValidations(supportTicketDto))
                 {
-                    Id = Guid.NewGuid(),
-                    UserEmail = supportTicketDto.UserEmail,
-                    Description = supportTicketDto.Description,
-                    DueDate = DateTime.Parse(supportTicketDto.DueDate).ToUniversalTime(),
-                    IsComplete = false
-                };
 
-                if(!await _supportTicketrepository.AddSupportTicket(Ticket))
+
+                    SupportTicketEntity Ticket = new SupportTicketEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        UserEmail = supportTicketDto.UserEmail,
+                        Description = supportTicketDto.Description,
+                        DueDate = DateTime.Parse(supportTicketDto.DueDate).ToUniversalTime(),
+                        IsComplete = false
+                    };
+
+                    if (!await _supportTicketrepository.AddSupportTicket(Ticket))
+                    {
+                        Response.Data = null;
+                        Response.Success = false;
+                        Response.Error = "RepoError";
+                        return Response;
+                    }
+
+                    Response.Data = _mapper.Map<SupportTicketDto>(Ticket);
+                    Response.Success = true;
+                    Response.Message = "Ok";
+                }
+                else
                 {
                     Response.Data = null;
                     Response.Success = false;
-                    Response.Error = "RepoError";
+                    Response.Error = "ValidationError";
                     return Response;
                 }
-
-                Response.Data = _mapper.Map<SupportTicketDto>(Ticket);
-                Response.Success = true;
-                Response.Message = "Ok";
             }
             catch (Exception ex)
             {
